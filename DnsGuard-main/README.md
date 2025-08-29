@@ -39,15 +39,34 @@ cd backend
 pip install -r requirements.txt
 ```
 
-### 4. Set up Environment Variables (Optional)
-The application will work without API keys, but for full functionality:
+### 4. Set up Environment Variables
+The app can run without API keys (external checks disabled). For full functionality:
 
+Frontend (Next.js) – create `.env.local` at repo root (or copy from example):
+```ini
+# .env.example (copy to .env.local for local dev)
+NEXT_PUBLIC_BACKEND_URL=http://localhost:5000
+```
+
+Backend (Flask) – create `backend/.env` (or copy from example) and fill values:
+```ini
+# backend/.env.example (copy to backend/.env and fill values)
+VIRUSTOTAL_API_KEY=
+GOOGLE_SAFE_BROWSING_API_KEY=
+ABUSEIPDB_API_KEY=
+
+# Optional
+FLASK_ENV=development
+PORT=5000
+```
+
+You can also auto-generate a starter backend `.env`:
 ```bash
 cd backend
 python setup_env.py
 ```
 
-Then edit the `.env` file and add your API keys:
+Then add your API keys:
 - **VirusTotal**: https://www.virustotal.com/gui/join-us
 - **Google Safe Browsing**: https://developers.google.com/safe-browsing
 - **AbuseIPDB**: https://www.abuseipdb.com/api
@@ -72,6 +91,33 @@ The frontend will start on `http://localhost:3000`
 
 ### 3. Access the Application
 Open your browser and navigate to `http://localhost:3000`
+
+## Deploying
+
+### Deploy frontend to Vercel
+The frontend can be deployed to Vercel. Real-time packet monitoring will not run on Vercel, but the Manual Domain Analysis works if it points to a reachable backend.
+
+1. Push this repository to GitHub (fork or your own repo).
+2. Import the repo in Vercel and select the Next.js app.
+3. In Vercel Project Settings → Environment Variables, add:
+   - `NEXT_PUBLIC_BACKEND_URL` = URL of your hosted backend (e.g., Railway)
+4. Deploy.
+
+Notes:
+- In production, the app avoids real-time fetching if the backend isn’t reachable.
+- Set a valid backend URL to enable Manual Domain Analysis in production.
+
+### Deploy backend to Railway (or your server)
+Packet sniffing requires low-level network access and typically won’t work on managed hosts. You can still deploy the backend to expose the `/analyze_domain` endpoint for manual checks.
+
+1. Create a new project on Railway (or similar PaaS).
+2. Deploy the `backend/` folder (Python/Flask).
+3. Set environment variables in your service:
+   - `VIRUSTOTAL_API_KEY`
+   - `GOOGLE_SAFE_BROWSING_API_KEY`
+   - `ABUSEIPDB_API_KEY`
+4. Expose port `5000` and obtain your public service URL.
+5. In Vercel, set `NEXT_PUBLIC_BACKEND_URL` to this backend URL.
 
 ## Usage
 
