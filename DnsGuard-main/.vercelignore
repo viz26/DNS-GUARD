@@ -1,0 +1,37 @@
+# Backend files (not needed for Vercel frontend deployment)
+backend/
+*.py
+requirements.txt
+setup_env.py
+ENVIRONMENT_SETUP.md
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+
+# Logs
+logs/
+*.log
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db

@@ -1,0 +1,8 @@
+[
+    "DNS Query: v10.events.data.microsoft.com. | Source: 192.168.29.142 | Destination: 192.168.29.1 | Threat Level: Medium",
+    "DNS Query: v10.events.data.microsoft.com. | Source: 192.168.29.142 | Destination: 192.168.29.1 | Threat Level: Medium",
+    "DNS Query: v10.events.data.microsoft.com. | Source: 192.168.29.1 | Destination: 192.168.29.142 | Threat Level: Medium",
+    "DNS Query: v10.events.data.microsoft.com. | Source: 192.168.29.1 | Destination: 192.168.29.142 | Threat Level: Medium",
+    "DNS Query: clientauthconfig.clients6.google.com. | Source: 192.168.29.142 | Destination: 192.168.29.1 | Threat Level: Medium",
+    "DNS Query: clientauthconfig.clients6.google.com. | Source: 192.168.29.1 | Destination: 192.168.29.142 | Threat Level: Medium"
+]
