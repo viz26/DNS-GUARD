@@ -1,185 +1,243 @@
-# DNS Guard - Real-time Network Vulnerabilities Checker
+# 🛡️ DNS Guard Pro - Advanced Network Security & Threat Intelligence Platform
 
-A real-time DNS monitoring application that detects potential security threats by analyzing DNS queries and checking them against various threat intelligence services.
+A comprehensive cybersecurity platform that combines domain analysis, threat intelligence, and file analysis capabilities to protect against various cyber threats.
 
-## Features
+## ✨ Features
 
-- **Real-time DNS Monitoring**: Captures and analyzes DNS queries in real-time
-- **Threat Detection**: Uses multiple methods to detect potential threats:
-  - Entropy analysis for suspicious domains
-  - VirusTotal integration for malware detection
-  - Google Safe Browsing for phishing/malware URLs
-  - AbuseIPDB for malicious IP addresses
-  - Local blocklist checking
-- **Interactive Dashboard**: Real-time charts and logs display
-- **Web Interface**: Modern React-based frontend with Tailwind CSS
+### 🎯 Threat Intelligence Dashboard
+- **Real-time Security Insights**: Live threat analysis and monitoring
+- **Threat Distribution**: High, Medium, and Low threat level categorization
+- **Recent Threats**: Track latest detected threats with timestamps
+- **Top Malicious Domains**: Identify most dangerous domains
+- **Security Trends**: 24h, 7-day, and 30-day security analytics
 
-## Prerequisites
+### 🔍 Advanced Domain Analysis
+- **Comprehensive DNS Analysis**: A, AAAA, MX, TXT, NS, CNAME records
+- **SSL Certificate Analysis**: Certificate validity, issuer, expiration dates
+- **Subdomain Enumeration**: Discover hidden subdomains
+- **Port Scanning**: Check open ports and services
+- **WHOIS Information**: Domain registration details
+- **Security Scoring**: Automated threat level assessment
 
+### 📁 Suspicious File Analysis
+- **VirusTotal Integration**: Upload and analyze files for malware
+- **Multi-Hash Analysis**: MD5, SHA1, SHA256 hash calculation
+- **Threat Detection**: Real-time malware scanning results
+- **File Information**: Size, type, and detailed analysis
+- **Direct VirusTotal Links**: Access full analysis reports
+
+### 🌐 Domain Security Features
+- **Multi-API Integration**: VirusTotal, Google Safe Browsing, AbuseIPDB
+- **Real-time Threat Detection**: Instant security assessment
+- **Comprehensive Logging**: Detailed analysis history
+- **Export Capabilities**: JSON and CSV report downloads
+
+## 🚀 Tech Stack
+
+### Frontend
+- **Next.js 14**: React framework with App Router
+- **TypeScript**: Type-safe development
+- **Tailwind CSS**: Modern styling
+- **Responsive Design**: Mobile-first approach
+
+### Backend
+- **Flask**: Python web framework
+- **DNS Analysis**: dnspython library
+- **SSL Analysis**: cryptography library
+- **WHOIS Lookup**: python-whois library
+- **File Analysis**: VirusTotal API integration
+- **CORS Support**: Cross-origin resource sharing
+
+### APIs & Services
+- **VirusTotal API**: File and domain threat analysis
+- **Google Safe Browsing API**: URL threat detection
+- **AbuseIPDB API**: IP reputation checking
+- **DNS Services**: Comprehensive DNS record analysis
+
+## 🏗️ Architecture
+
+```
+DNS Guard Pro
+├── Frontend (Next.js)
+│   ├── Threat Intelligence Dashboard
+│   ├── Advanced Domain Analysis
+│   ├── File Analysis Interface
+│   └── Responsive UI Components
+├── Backend (Flask)
+│   ├── Domain Analysis Engine
+│   ├── File Analysis Service
+│   ├── Threat Intelligence API
+│   └── Multi-API Integration
+└── External APIs
+    ├── VirusTotal
+    ├── Google Safe Browsing
+    └── AbuseIPDB
+```
+
+## 🛠️ Installation & Setup
+
+### Prerequisites
 - Node.js 18+ and npm
 - Python 3.8+
-- Administrator privileges (for DNS packet capture)
+- Git
 
-## Installation
-
-### 1. Clone the repository
+### 1. Clone the Repository
 ```bash
-git clone <repository-url>
-cd DnsGuard-main
+git clone https://github.com/viz26/DNS-GUARD.git
+cd DNS-GUARD
 ```
 
-### 2. Install Frontend Dependencies
+### 2. Frontend Setup
 ```bash
 npm install
-```
-
-### 3. Install Backend Dependencies
-```bash
-cd backend
-pip install -r requirements.txt
-```
-
-### 4. Set up Environment Variables
-The app can run without API keys (external checks disabled). For full functionality:
-
-Frontend (Next.js) – create `.env.local` at repo root (or copy from example):
-```ini
-# .env.example (copy to .env.local for local dev)
-NEXT_PUBLIC_BACKEND_URL=http://localhost:5000
-```
-
-Backend (Flask) – create `backend/.env` (or copy from example) and fill values:
-```ini
-# backend/.env.example (copy to backend/.env and fill values)
-VIRUSTOTAL_API_KEY=
-GOOGLE_SAFE_BROWSING_API_KEY=
-ABUSEIPDB_API_KEY=
-
-# Optional
-FLASK_ENV=development
-PORT=5000
-```
-
-You can also auto-generate a starter backend `.env`:
-```bash
-cd backend
-python setup_env.py
-```
-
-Then add your API keys:
-- **VirusTotal**: https://www.virustotal.com/gui/join-us
-- **Google Safe Browsing**: https://developers.google.com/safe-browsing
-- **AbuseIPDB**: https://www.abuseipdb.com/api
-
-## Running the Application
-
-### 1. Start the Backend Server
-```bash
-cd backend
-python app.py
-```
-
-The backend will start on `http://localhost:5000`
-
-### 2. Start the Frontend Development Server
-In a new terminal:
-```bash
 npm run dev
 ```
 
-The frontend will start on `http://localhost:3000`
-
-### 3. Access the Application
-Open your browser and navigate to `http://localhost:3000`
-
-## Deploying
-
-### Deploy frontend to Vercel
-The frontend can be deployed to Vercel. Real-time packet monitoring will not run on Vercel, but the Manual Domain Analysis works if it points to a reachable backend.
-
-1. Push this repository to GitHub (fork or your own repo).
-2. Import the repo in Vercel and select the Next.js app.
-3. In Vercel Project Settings → Environment Variables, add:
-   - `NEXT_PUBLIC_BACKEND_URL` = URL of your hosted backend (e.g., Railway)
-4. Deploy.
-
-Notes:
-- In production, the app avoids real-time fetching if the backend isn’t reachable.
-- Set a valid backend URL to enable Manual Domain Analysis in production.
-
-### Deploy backend to Railway (or your server)
-Packet sniffing requires low-level network access and typically won’t work on managed hosts. You can still deploy the backend to expose the `/analyze_domain` endpoint for manual checks.
-
-1. Create a new project on Railway (or similar PaaS).
-2. Deploy the `backend/` folder (Python/Flask).
-3. Set environment variables in your service:
-   - `VIRUSTOTAL_API_KEY`
-   - `GOOGLE_SAFE_BROWSING_API_KEY`
-   - `ABUSEIPDB_API_KEY`
-4. Expose port `5000` and obtain your public service URL.
-5. In Vercel, set `NEXT_PUBLIC_BACKEND_URL` to this backend URL.
-
-## Usage
-
-1. **Start Monitoring**: Click the "Start Fetching" button to begin DNS monitoring
-2. **View Real-time Data**: The dashboard will show:
-   - Real-time threat level charts
-   - DNS query logs with threat assessments
-   - Source and destination IP addresses
-3. **Stop Monitoring**: Click "Stop Fetching" to halt monitoring
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Permission Denied for DNS Capture**
-   - Run the backend with administrator privileges
-   - On Windows: Run PowerShell as Administrator
-
-2. **Backend Connection Issues**
-   - Ensure the backend is running on port 5000
-   - Check if firewall is blocking the connection
-
-3. **API Key Errors**
-   - The application works without API keys
-   - External threat checking will be disabled
-   - Only local detection methods will be active
-
-4. **Build Errors**
-   - Ensure all dependencies are installed
-   - Check Node.js and Python versions
-
-### Warnings
-- The Wireshark warnings about "manuf" are normal and don't affect functionality
-- DNS monitoring requires network access and may trigger security software
-
-## Development
-
-### Project Structure
-```
-DnsGuard-main/
-├── app/                 # Next.js app directory
-├── components/          # React components
-├── backend/            # Python Flask backend
-│   ├── app.py         # Main Flask application
-│   ├── dns_analyzer.py # Threat analysis logic
-│   └── requirements.txt # Python dependencies
-├── public/             # Static assets
-└── package.json        # Node.js dependencies
-```
-
-### Building for Production
+### 3. Backend Setup
 ```bash
-npm run build
-npm start
+cd backend
+pip install -r requirements.txt
+python app.py
 ```
 
-## Security Notes
+### 4. Environment Variables
 
-- This application captures DNS traffic for analysis
-- API keys should be kept secure and not committed to version control
-- The application runs locally and doesn't send data to external servers (except for threat intelligence APIs)
+#### Frontend (.env.local)
+```env
+NEXT_PUBLIC_BACKEND_URL=http://localhost:8000
+```
 
-## License
+#### Backend Environment Variables
+```env
+VIRUSTOTAL_API_KEY=your_virustotal_api_key
+GOOGLE_SAFE_BROWSING_API_KEY=your_google_api_key
+ABUSEIPDB_API_KEY=your_abuseipdb_api_key
+```
 
-This project is for educational and security research purposes.
+## 🌐 Deployment
+
+### Vercel (Frontend)
+1. Connect your GitHub repository to Vercel
+2. Set environment variables in Vercel dashboard
+3. Deploy automatically on push to main branch
+
+### Render (Backend)
+1. Create new Web Service on Render
+2. Connect GitHub repository
+3. Set build command: `pip install -r backend/requirements.txt`
+4. Set start command: `cd backend && gunicorn app:app --bind 0.0.0.0:$PORT`
+5. Add environment variables
+
+## 📊 API Endpoints
+
+### Domain Analysis
+- `POST /analyze_domain` - Basic domain analysis
+- `POST /analyze_domain_advanced` - Comprehensive domain analysis
+- `GET /dns_records/<domain>` - DNS record lookup
+- `GET /ssl_certificate/<domain>` - SSL certificate analysis
+- `GET /subdomains/<domain>` - Subdomain enumeration
+- `GET /port_scan/<domain>` - Port scanning
+- `GET /whois/<domain>` - WHOIS information
+
+### File Analysis
+- `POST /analyze_file` - File upload and analysis
+
+### Threat Intelligence
+- `GET /threat_intelligence` - Threat intelligence dashboard data
+
+### Logs & Reports
+- `GET /logs` - Analysis logs
+- `GET /summary` - Traffic summary
+- `GET /download_json_logs` - Export logs as JSON
+- `GET /download_csv_logs` - Export logs as CSV
+
+## 🔧 Configuration
+
+### API Keys Setup
+1. **VirusTotal**: Get free API key from [virustotal.com](https://www.virustotal.com)
+2. **Google Safe Browsing**: Enable API in Google Cloud Console
+3. **AbuseIPDB**: Register at [abuseipdb.com](https://www.abuseipdb.com)
+
+### File Size Limits
+- **VirusTotal**: 32MB maximum file size for free API
+- **Supported Formats**: All file types
+
+## 📈 Usage Examples
+
+### Domain Analysis
+```bash
+curl -X POST http://localhost:8000/analyze_domain_advanced \
+  -H "Content-Type: application/json" \
+  -d '{"domain": "example.com"}'
+```
+
+### File Analysis
+```bash
+curl -X POST http://localhost:8000/analyze_file \
+  -F "file=@suspicious_file.exe"
+```
+
+## 🛡️ Security Features
+
+- **CORS Protection**: Cross-origin request handling
+- **Input Validation**: Comprehensive input sanitization
+- **Error Handling**: Graceful error management
+- **Rate Limiting**: API usage protection
+- **Secure File Upload**: File type and size validation
+
+## 📱 User Interface
+
+### Modern Dashboard
+- **Real-time Updates**: Live threat intelligence
+- **Interactive Charts**: Visual security metrics
+- **Responsive Design**: Works on all devices
+- **Dark/Light Theme**: User preference support
+
+### Analysis Tools
+- **Domain Scanner**: Comprehensive domain analysis
+- **File Analyzer**: Malware detection interface
+- **Threat Intelligence**: Security insights dashboard
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 👨‍💻 Developer
+
+**Developed by Vidit Purohit**
+- Cybersecurity Engineer & Full-Stack Developer
+- Specialized in Network Security & Threat Intelligence
+
+## 🆘 Support
+
+For support and questions:
+- Create an issue on GitHub
+- Check the documentation
+- Review API documentation
+
+## 🔄 Version History
+
+### v2.0.0 (Current)
+- ✅ Advanced Domain Analysis
+- ✅ Threat Intelligence Dashboard
+- ✅ File Analysis with VirusTotal
+- ✅ Enhanced UI/UX
+- ✅ Multi-API Integration
+- ✅ Comprehensive Logging
+
+### v1.0.0
+- ✅ Basic DNS Analysis
+- ✅ Simple Threat Detection
+- ✅ Basic UI
+
+---
+
+**DNS Guard Pro** - Your comprehensive cybersecurity companion! 🛡️✨
