@@ -184,7 +184,7 @@ export default function AdvancedDomainAnalysis() {
                   <div>
                     <h4 style={{ color: '#dc2626', marginBottom: '0.5rem' }}>🚨 Critical Issues</h4>
                     <ul style={{ textAlign: 'left', color: '#dc2626' }}>
-                                              {results.security_score.issues.map((issue: any, index) => (
+                                              {results.security_score.issues.map((issue: any, index: number) => (
                         <li key={index}>{issue}</li>
                       ))}
                     </ul>
@@ -194,7 +194,7 @@ export default function AdvancedDomainAnalysis() {
                   <div>
                     <h4 style={{ color: '#f59e0b', marginBottom: '0.5rem' }}>⚠️ Warnings</h4>
                     <ul style={{ textAlign: 'left', color: '#f59e0b' }}>
-                                              {results.security_score.warnings.map((warning: any, index) => (
+                                              {results.security_score.warnings.map((warning: any, index: number) => (
                         <li key={index}>{warning}</li>
                       ))}
                     </ul>
@@ -282,7 +282,7 @@ export default function AdvancedDomainAnalysis() {
                           <div style={{ fontWeight: '600', color: '#374151', marginBottom: '0.5rem' }}>{recordType} Records</div>
                           {Array.isArray(records) && records.length > 0 ? (
                             <div style={{ color: '#6b7280' }}>
-                              {records.map((record: any, index) => (
+                              {records.map((record: any, index: number) => (
                                 <div key={index}>{record}</div>
                               ))}
                             </div>
@@ -349,7 +349,7 @@ export default function AdvancedDomainAnalysis() {
                       </div>
                       {results.subdomains.subdomains.length > 0 ? (
                         <div style={{ display: 'grid', gap: '0.5rem' }}>
-                          {results.subdomains.subdomains.map((subdomain: any, index) => (
+                          {results.subdomains.subdomains.map((subdomain: any, index: number) => (
                             <div key={index} style={{ 
                               padding: '0.75rem', 
                               backgroundColor: '#f0f9ff', 
@@ -389,7 +389,7 @@ export default function AdvancedDomainAnalysis() {
                       </div>
                       {results.port_scan.open_ports.length > 0 ? (
                         <div style={{ display: 'grid', gap: '0.5rem' }}>
-                          {results.port_scan.open_ports.map((port: any, index) => (
+                          {results.port_scan.open_ports.map((port: any, index: number) => (
                             <div key={index} style={{ 
                               padding: '0.75rem', 
                               backgroundColor: '#fef3c7', 
