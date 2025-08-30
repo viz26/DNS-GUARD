@@ -1,122 +1,61 @@
 from flask import Flask, jsonify, request, send_file
-from scapy.all import sniff, DNS, IP
-import threading
 import logging
 import os
 from datetime import datetime
 from io import BytesIO, StringIO
 from dns_analyzer import get_threat_level
 from flask_cors import CORS
+import json
 
 # Initialize Flask app
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 
 # Configure logging
-logging.basicConfig(filename="logs/dns_guard.log", level=logging.INFO, format="%(asctime)s - %(message)s")
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(message)s")
 
 # Global variables
-is_monitoring = False
 traffic_logs = []
-
-# Function to handle DNS packets
-def dns_packet_handler(packet):
-    try:
-        if IP in packet:
-            src_ip = packet[IP].src
-            dst_ip = packet[IP].dst
-            if packet.haslayer(DNS) and packet[DNS].qd:
-                dns_layer = packet[DNS]
-                domain = dns_layer.qd.qname.decode('utf-8').rstrip('.')
-                
-                # Skip local/private IPs and common domains to reduce noise
-                if (src_ip.startswith(('127.', '192.168.', '10.', '172.')) or 
-                    domain in ['localhost', 'local', 'home.arpa'] or
-                    len(domain) < 3):
-                    return
-                
-                # Check if we already processed this domain recently (within last 30 seconds)
-                current_time = datetime.now()
-                recent_logs = [log for log in traffic_logs[-10:] if isinstance(log, dict)]
-                for recent_log in recent_logs:
-                    if (recent_log.get('domain') == domain and 
-                        recent_log.get('source_ip') == src_ip):
-                        # Skip duplicate entries
-                        return
-                
-                # Get threat analysis with optimized processing
-                threat_analysis = get_threat_level(domain, src_ip)
-                threat_level = threat_analysis["threat_level"]
-                
-                # Create detailed log entry
-                log_entry = {
-                    "timestamp": current_time.strftime("%H:%M:%S"),
-                    "domain": domain,
-                    "source_ip": src_ip,
-                    "destination_ip": dst_ip,
-                    "threat_level": threat_level,
-                    "entropy_score": threat_analysis["entropy_score"],
-                    "virustotal_threat": threat_analysis["virustotal_threat"],
-                    "google_safe_browsing_threat": threat_analysis["google_safe_browsing_threat"],
-                    "abuseipdb_threat": threat_analysis["abuseipdb_threat"],
-                    "threat_details": threat_analysis["threat_details"]
-                }
-                
-                # Store in traffic logs (keep only last 100 entries to prevent memory issues)
-                traffic_logs.append(log_entry)
-                if len(traffic_logs) > 100:
-                    traffic_logs.pop(0)
-                
-                # Log to file
-                logging.info(f"DNS Query: {domain} from {src_ip} - Threat Level: {threat_level}")
-    except Exception as e:
-        print(f"Error processing DNS packet: {e}")
-
-# Function to start DNS monitoring
-def start_monitoring():
-    global is_monitoring
-    if not is_monitoring:
-        is_monitoring = True
-        threading.Thread(target=sniff, kwargs={"filter": "udp port 53", "prn": dns_packet_handler}).start()
-
-# Function to stop DNS monitoring
-def stop_monitoring():
-    global is_monitoring
-    is_monitoring = False
-
-# API endpoint to start monitoring
-@app.route('/start', methods=['POST'])
-def start():
-    start_monitoring()
-    return jsonify({"status": "started"})
-
-# API endpoint to stop monitoring
-@app.route('/stop', methods=['POST'])
-def stop():
-    stop_monitoring()
-    return jsonify({"status": "stopped"})
 
 # API endpoint to fetch logs
 @app.route('/logs', methods=['GET'])
-def logs():
+def get_logs():
     return jsonify(traffic_logs)
 
-# API endpoint to download logs
-@app.route('/download_logs', methods=['GET'])
-def download_logs():
-    log_file_path = 'logs/dns_guard.log'
-    if os.path.exists(log_file_path):
-        return send_file(log_file_path, as_attachment=True)
-    else:
-        return "Log file not found", 404
-
-# API endpoint to download detailed logs as JSON
-@app.route('/download_detailed_logs', methods=['GET'])
-def download_detailed_logs():
-    import json
-    from io import BytesIO
+# API endpoint to get traffic summary
+@app.route('/summary', methods=['GET'])
+def get_summary():
+    if not traffic_logs:
+        return jsonify({
+            "total_queries": 0,
+            "threat_summary": {"high": 0, "medium": 0, "low": 0},
+            "api_analysis": {"virustotal_flags": 0, "google_safe_browsing_flags": 0, "abuseipdb_flags": 0}
+        })
     
-    # Create detailed JSON report
+    report = {
+        "generated_at": datetime.now().isoformat(),
+        "total_queries": len(traffic_logs),
+        "threat_summary": {
+            "high": len([log for log in traffic_logs if isinstance(log, dict) and log.get("threat_level") == "High"]),
+            "medium": len([log for log in traffic_logs if isinstance(log, dict) and log.get("threat_level") == "Medium"]),
+            "low": len([log for log in traffic_logs if isinstance(log, dict) and log.get("threat_level") == "Low"])
+        },
+        "api_analysis": {
+            "virustotal_flags": len([log for log in traffic_logs if isinstance(log, dict) and log.get("virustotal_threat")]),
+            "google_safe_browsing_flags": len([log for log in traffic_logs if isinstance(log, dict) and log.get("google_safe_browsing_threat")]),
+            "abuseipdb_flags": len([log for log in traffic_logs if isinstance(log, dict) and log.get("abuseipdb_threat")])
+        },
+        "detailed_logs": traffic_logs
+    }
+    
+    return jsonify(report)
+
+# API endpoint to download logs as JSON
+@app.route('/download_json_logs', methods=['GET'])
+def download_json_logs():
+    if not traffic_logs:
+        return jsonify({"error": "No logs available"}), 404
+    
     report = {
         "generated_at": datetime.now().isoformat(),
         "total_queries": len(traffic_logs),
@@ -151,6 +90,9 @@ def download_detailed_logs():
 def download_csv_logs():
     import csv
     from io import StringIO
+    
+    if not traffic_logs:
+        return jsonify({"error": "No logs available"}), 404
     
     # Create CSV data
     output = StringIO()
@@ -200,6 +142,25 @@ def analyze_domain():
         # Get threat analysis for the domain
         threat_analysis = get_threat_level(domain, "0.0.0.0")  # Using dummy IP for manual analysis
         
+        # Add to traffic logs for tracking
+        log_entry = {
+            "timestamp": datetime.now().strftime("%H:%M:%S"),
+            "domain": domain,
+            "source_ip": "Manual Analysis",
+            "destination_ip": "N/A",
+            "threat_level": threat_analysis.get("threat_level", "Low"),
+            "entropy_score": threat_analysis.get("entropy_score", 0),
+            "virustotal_threat": threat_analysis.get("virustotal_threat", False),
+            "google_safe_browsing_threat": threat_analysis.get("google_safe_browsing_threat", False),
+            "abuseipdb_threat": threat_analysis.get("abuseipdb_threat", False),
+            "threat_details": threat_analysis.get("threat_details", [])
+        }
+        
+        # Store in traffic logs (keep only last 100 entries)
+        traffic_logs.append(log_entry)
+        if len(traffic_logs) > 100:
+            traffic_logs.pop(0)
+        
         return jsonify({
             "domain": domain,
             "virustotal_threat": threat_analysis.get("virustotal_threat", False),
@@ -214,6 +175,27 @@ def analyze_domain():
         print(f"Error analyzing domain: {e}")
         return jsonify({"error": "Failed to analyze domain"}), 500
 
+# Health check endpoint for Render
+@app.route('/health', methods=['GET'])
+def health_check():
+    return jsonify({"status": "healthy", "timestamp": datetime.now().isoformat()})
+
+# Root endpoint
+@app.route('/', methods=['GET'])
+def root():
+    return jsonify({
+        "message": "DNS Guard Backend API",
+        "endpoints": {
+            "analyze_domain": "POST /analyze_domain",
+            "logs": "GET /logs",
+            "summary": "GET /summary",
+            "download_json": "GET /download_json_logs",
+            "download_csv": "GET /download_csv_logs",
+            "health": "GET /health"
+        }
+    })
+
 # Run the Flask app
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)
